@@ -207,5 +207,6 @@ if (gg === 'roxy' || gg == 'zenith') {
       if (event.key === 'Enter') {resetGame()}});
 
 }   
+
 videoPlayer.addEventListener('ended', handleVideoEnd);
 
