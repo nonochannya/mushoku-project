@@ -6,8 +6,7 @@ let main, div, div2, div3, div4, div6;
 let name, image, image2, image3, gifImage, tryAgainButton;
 
 let loadProgress = 0;
-const totalAssetsToLoad = 50;
-let loadedAssets = 0;
+let isLoadingComplete = false;
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -44,17 +43,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function updateLoadingProgress() {
-  loadedAssets++;
-  loadProgress = Math.min((loadedAssets / totalAssetsToLoad) * 100, 100);
+  if (isLoadingComplete) return;
+  
+  // Only increment by small amounts to prevent jumping to 100% too fast
+  loadProgress = Math.min(loadProgress + 2, 95);
   if (loadingBar) loadingBar.style.width = loadProgress + '%';
   if (loadingPercent) loadingPercent.textContent = Math.round(loadProgress) + '%';
-  
-  if (loadProgress >= 100) {
-    setTimeout(showStartScreen, 500);
-  }
 }
 
 function showStartScreen() {
+  isLoadingComplete = true;
   if (loadingScreen) {
     loadingScreen.style.display = 'none';
   }
@@ -66,26 +64,47 @@ function showStartScreen() {
 function preloadAssets() {
   const assetsToPreload = [
     '696c1346c27df162ecd95129ff4ea552.jpg',
-    'nonoIcone.png',
-    'Untitled video - Made with Clipchamp.mp4'
+    'nonoIcone.png'
   ];
+  
+  let actualAssetsLoaded = 0;
+  const totalActualAssets = assetsToPreload.length;
   
   assetsToPreload.forEach(src => {
     const img = new Image();
-    img.onload = updateLoadingProgress;
-    img.onerror = updateLoadingProgress; // Count even failed loads
+    img.onload = () => {
+      actualAssetsLoaded++;
+      updateLoadingProgress();
+    };
+    img.onerror = () => {
+      actualAssetsLoaded++;
+      updateLoadingProgress();
+    };
     img.src = src;
   });
   
-  // Simulate additional loading for other assets
-  let simulatedLoads = 0;
+  // Simulate additional loading for other assets (more reliable timing)
+  const simulationSteps = 20;
+  let currentStep = 0;
+  const stepSize = 80 / simulationSteps; // Leave room for actual assets
+  
   const simulateInterval = setInterval(() => {
-    simulatedLoads += 5;
-    updateLoadingProgress();
-    if (simulatedLoads >= 47) {
+    currentStep++;
+    loadProgress = Math.min(currentStep * stepSize, 95);
+    if (loadingBar) loadingBar.style.width = loadProgress + '%';
+    if (loadingPercent) loadingPercent.textContent = Math.round(loadProgress) + '%';
+    
+    if (currentStep >= simulationSteps) {
       clearInterval(simulateInterval);
+      // Force completion after simulation
+      setTimeout(() => {
+        loadProgress = 100;
+        if (loadingBar) loadingBar.style.width = '100%';
+        if (loadingPercent) loadingPercent.textContent = '100%';
+        setTimeout(showStartScreen, 300);
+      }, 200);
     }
-  }, 100);
+  }, 50);
 }
 
 function randomWifu() {
