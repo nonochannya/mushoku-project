@@ -25,15 +25,14 @@ function randomWifu() {
   let cumulativeProbability = 0;
 
   
-  while (randomNumber >= cumulativeProbability) {
-    for (const [randomWifu, probability] of Object.entries(probabilities)) {
-        cumulativeProbability += probability;
-        if (randomNumber < cumulativeProbability) {
-            return randomWifu;
-        };
-    };
-};
-};
+  for (const [wifuName, probability] of Object.entries(probabilities)) {
+    cumulativeProbability += probability;
+    if (randomNumber < cumulativeProbability) {
+      return wifuName;
+    }
+  }
+  return 'roxy'; // fallback
+}
 
 const playButton = document.getElementById('playButton');
 const videoPlayer = document.getElementById('videoPlayer');
@@ -93,104 +92,118 @@ function handleVideoEnd(){
 
     const gg = randomWifu();
   
-    document.body.style.backgroundImage = `url("back-image/back-${gg}.gif")`;
+    // Try different background formats (gif, png, mp4)
+    const bgGif = `back-image/back-${gg}.gif`;
+    const bgPng = `back-image/back-${gg}.png`;
+    const bgMp4 = `back-image/back-${gg}.mp4`;
+    
+    // Check if background video exists for this character
+    if (gg === 'aisha' || gg === 'nina') {
+      // These use video backgrounds - handled separately below
+    } else {
+      // Try gif first, then png
+      const bgImage = new Image();
+      bgImage.onload = () => {
+        document.body.style.backgroundImage = `url("${bgGif}")`;
+      };
+      bgImage.onerror = () => {
+        // Try PNG if GIF doesn't exist
+        const bgPngImage = new Image();
+        bgPngImage.onload = () => {
+          document.body.style.backgroundImage = `url("${bgPng}")`;
+        };
+        bgPngImage.onerror = () => {
+          document.body.style.backgroundImage = 'none';
+        };
+        bgPngImage.src = bgPng;
+      };
+      bgImage.src = bgGif;
+    }
     document.body.style.backgroundRepeat = 'no-repeat';
   
     name.textContent = `${gg}`;
     name.classList.add('wifu-name');
     name.classList.add('animate__animated', 'animate__shakeY','animate__infinite' )
   
-    image.src = `imag\\${gg}\\${gg}.png`;
-    image.classList.add('animate__animated', 'animate__fadeInBottomRight');
-    image.classList.add('image');
-    image.loading = "lazy"; // Add the loading attribute here
+    // Load images with error handling for missing files
+    loadImage(image, `imag/${gg}/${gg}.png`);
+    image.classList.add('animate__animated', 'animate__fadeInBottomRight', 'image');
 
-    image2.src = `imag\\${gg}\\${gg}2.png`;
-    image2.classList.add('animate__animated', 'animate__fadeInBottomRight' , 'image2');
-    image2.loading = "lazy"; // Add the loading attribute here
+    loadImage(image2, `imag/${gg}/${gg}2.png`, () => {
+      image2.classList.add('animate__animated', 'animate__fadeInBottomRight', 'image2');
+    });
 
-    image3.src = `imag\\${gg}\\${gg}3.png`;
-    image3.classList.add('animate__animated', 'animate__fadeInBottomRight', 'image3');
-    image3.loading = "lazy"; // Add the loading attribute here
+    loadImage(image3, `imag/${gg}/${gg}3.png`, () => {
+      image3.classList.add('animate__animated', 'animate__fadeInBottomRight', 'image3');
+    });
 
-    gifImage.src = `gif\\${gg}.gif`;
+    // Load gif/png with error handling
+    const gifSrc = `gif/${gg}.gif`;
+    const pngSrc = `gif/${gg}.png`;
+    loadImage(gifImage, gifSrc, null, () => {
+      // If gif fails, try png
+      loadImage(gifImage, pngSrc, () => {
+        gifImage.style.width = '300px';
+        gifImage.style.padding = '0';
+        gifImage.style.backgroundRepeat = 'no-repeat';
+        gifImage.classList.add('animate__animated', 'animate__fadeInBottomRight');
+      });
+    });
     gifImage.style.width = '300px';
     gifImage.style.padding = '0';
     gifImage.style.backgroundRepeat = 'no-repeat';
     gifImage.classList.add('animate__animated', 'animate__fadeInBottomRight');
 
-if (gg === 'roxy' || gg == 'zenith') {
-      image2.src = '';
-      image3.src = '';
-    }else if (gg ==='juliette') {
-          image3.src = '';
-          gifImage.src ='';
-       }else if(gg ==='juliette') {
-            image.src ='';
-            image3.src = '';
-            gifImage.src ='';
-          }else if (gg === 'suzanne') {
-              gifImage.src = `gif\\${gg}.png`;
-              document.body.style.backgroundImage = `url("back-image/back-${gg}.png")`;
-            }else if (gg === 'ariel') {
-                gifImage.src = `gif\\${gg}.png`;
-                document.body.style.backgroundImage = 'url("back-image/back-' + gg + '.png")';
-              }else if(gg === 'aisha'){
-                  image2.src = '';
-                  image3.src = '';
-                  gifImage.src = ``;
-                  document.body.style.backgroundImage = ``;
-                  videoPlayer02.style.display = 'block';
-                  videoPlayer02.style.visibility = 'visible'
-                  videoPlayer02.play();
-                }else if( gg === 'kishirika'){
-                    image2.src ='';
-                    image3.src ='';
-                  }else if( gg === 'pursena'){
-                      image.src ='';
-                      image3.src ='';
-                      gifImage.src ='';
-                      document.body.style.backgroundImage = 'url("back-image/back-' + gg + '.png")';
-                    }else if(gg === 'norn' ||gg === 'eris' || gg === 'elinalise'){
-                        gifImage.src = '';
-                        image3.src=''
-                      }else if( gg === 'rokari'){
-                          gifImage.src = '';
-                          image3.src ='';
-                       }else if( gg === 'nanahoshi'){
-                            image.src ='';
-                         }else if(gg === 'linia'){
-                              image3.src ='';
-                              gifImage.src ='';
-                           }else if(gg === 'kishirika'  || gg === 'ghislaine'){
-                                image2.src = '';
-                                 image3.src = ''
-                             }else if(gg === 'sylphiette'){
-                                   image3.src = ''
-                               }else if(gg === 'hilda'){
-                                     image3.src ='';
-                                     gifImage.src ='';
-                                     document.body.style.backgroundImage = 'url("back-image/back-' + gg + '.png")';
-                                  }else if (gg === 'ariel' ) {
-                                        gifImage.src = `gif\\${gg}.png`;
-                                        document.body.style.backgroundImage = 'url("back-image/back-' + gg + '.png")';
-                                        image3.src = '';
-                                   }else if(gg === 'lilia'){
-                                          gifImage.src = '';
-                                          image3.src = ''
-                                          image2.src = '';
-                                      }else if(gg === 'nina'){
-                                            image3.src = '';
-                                            gifImage.src = ``;
-                                            document.body.style.backgroundImage = ``;
-                                            videoPlayer03.style.display = 'block';
-                                            videoPlayer03.style.visibility = 'visible'
-                                            videoPlayer03.play();
-                                       }else if(gg === 'sara'){
-                                        image3.src = '';
-                                        gifImage.src ='';
-                                        document.body.style.backgroundImage =  `url("back-image\\back-${gg}.png")`
-                                       }
+    // Character-specific configurations
+    const specialCases = {
+      roxy: () => { clearImages([image2, image3]); },
+      zenith: () => { clearImages([image2, image3]); },
+      juliette: () => { clearImages([image3, gifImage]); },
+      suzanne: () => { 
+        gifImage.src = `gif/${gg}.png`;
+        document.body.style.backgroundImage = `url("back-image/back-${gg}.png")`;
+      },
+      ariel: () => {
+        gifImage.src = `gif/${gg}.png`;
+        document.body.style.backgroundImage = `url("back-image/back-${gg}.png")`;
+      },
+      aisha: () => {
+        clearImages([image2, image3, gifImage]);
+        document.body.style.backgroundImage = '';
+        setupVideoBackground(videoPlayer02);
+      },
+      kishirika: () => { clearImages([image2, image3]); },
+      pursena: () => {
+        clearImages([image, image3, gifImage]);
+        document.body.style.backgroundImage = `url("back-image/back-${gg}.png")`;
+      },
+      norn: () => { clearImages([gifImage, image3]); },
+      eris: () => { clearImages([gifImage, image3]); },
+      elinalise: () => { clearImages([gifImage, image3]); },
+      rokari: () => { clearImages([gifImage, image3]); },
+      nanahoshi: () => { clearImages([image]); },
+      linia: () => { clearImages([image3, gifImage]); },
+      ghislaine: () => { clearImages([image2, image3]); },
+      sylphiette: () => { clearImages([image3]); },
+      hilda: () => {
+        clearImages([image3, gifImage]);
+        document.body.style.backgroundImage = `url("back-image/back-${gg}.png")`;
+      },
+      lilia: () => { clearImages([gifImage, image3, image2]); },
+      nina: () => {
+        clearImages([image3, gifImage]);
+        document.body.style.backgroundImage = '';
+        setupVideoBackground(videoPlayer03);
+      },
+      sara: () => {
+        clearImages([image3, gifImage]);
+        document.body.style.backgroundImage = `url("back-image/back-${gg}.png")`;
+      }
+    };
+
+    if (specialCases[gg]) {
+      specialCases[gg]();
+    }
 
     div.appendChild(gifImage);
     div2.appendChild(name);
@@ -208,6 +221,33 @@ if (gg === 'roxy' || gg == 'zenith') {
       if (event.key === 'Enter') {resetGame()}});
 
 }   
+
+// Helper function to load images with error handling
+function loadImage(imgElement, src, onLoadCallback, onErrorCallback) {
+  imgElement.onload = () => {
+    if (onLoadCallback) onLoadCallback();
+  };
+  imgElement.onerror = () => {
+    imgElement.src = ''; // Clear broken image
+    if (onErrorCallback) onErrorCallback();
+  };
+  imgElement.src = src;
+  imgElement.loading = "lazy";
+}
+
+// Helper function to clear multiple images
+function clearImages(elements) {
+  elements.forEach(el => {
+    if (el) el.src = '';
+  });
+}
+
+// Helper function to setup video background
+function setupVideoBackground(videoElement) {
+  videoElement.style.display = 'block';
+  videoElement.style.visibility = 'visible';
+  videoElement.play();
+}
 
 videoPlayer.addEventListener('ended', handleVideoEnd);
 
