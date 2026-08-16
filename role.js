@@ -1,3 +1,58 @@
+// Loading screen logic
+const loadingScreen = document.getElementById('loadingScreen');
+const startScreen = document.getElementById('startScreen');
+const loadingBar = document.getElementById('loadingBar');
+const loadingPercent = document.getElementById('loadingPercent');
+
+let loadProgress = 0;
+const totalAssetsToLoad = 50; // Estimate of assets to preload
+let loadedAssets = 0;
+
+function updateLoadingProgress() {
+  loadedAssets++;
+  loadProgress = Math.min((loadedAssets / totalAssetsToLoad) * 100, 100);
+  loadingBar.style.width = loadProgress + '%';
+  loadingPercent.textContent = Math.round(loadProgress) + '%';
+  
+  if (loadProgress >= 100) {
+    setTimeout(showStartScreen, 500);
+  }
+}
+
+function showStartScreen() {
+  loadingScreen.style.display = 'none';
+  startScreen.style.display = 'flex';
+}
+
+// Preload critical assets
+function preloadAssets() {
+  const assetsToPreload = [
+    '696c1346c27df162ecd95129ff4ea552.jpg',
+    'nonoIcone.png',
+    'Untitled video - Made with Clipchamp.mp4'
+  ];
+  
+  assetsToPreload.forEach(src => {
+    const img = new Image();
+    img.onload = updateLoadingProgress;
+    img.onerror = updateLoadingProgress;
+    img.src = src;
+  });
+  
+  // Simulate additional loading for other assets
+  let simulatedLoads = 0;
+  const simulateInterval = setInterval(() => {
+    simulatedLoads += 5;
+    updateLoadingProgress();
+    if (simulatedLoads >= 47) {
+      clearInterval(simulateInterval);
+    }
+  }, 100);
+}
+
+// Start preloading when page loads
+window.addEventListener('load', preloadAssets);
+
 function randomWifu() {
   const probabilities = {
       sylphiette: 0.02,
@@ -36,16 +91,22 @@ function randomWifu() {
 
 const playButton = document.getElementById('playButton');
 const videoPlayer = document.getElementById('videoPlayer');
+const resultOverlay = document.getElementById('resultOverlay');
+const resultCardBody = document.getElementById('resultCardBody');
+
 function start(){
-  playButton.style.display = 'none';
+  startScreen.style.display = 'none';
   videoPlayer.style.display = 'block';
   videoPlayer.play();
 };
+
+playButton.addEventListener('click', start);
+
 document.body.addEventListener('keydown',(event) => {
-  if(event.key === 'Enter'){
+  if(event.key === 'Enter' && startScreen.style.display !== 'none'){
    start();
   };
-  });
+});
 
 const main = document.getElementById("myElement");
 const div = document.querySelector('.F-div');
@@ -63,24 +124,33 @@ const videoPlayer02 = document.getElementById('videoPlayer02');
 const videoPlayer03 = document.getElementById('videoPlayer03');
   
 function resetGame() {
-    div3.removeChild(image);
-    div.removeChild(gifImage);
-    document.body.removeChild(tryAgainButton);
-    div2.removeChild(name);
-    div4.removeChild(image2);
-    div6.removeChild(image3);
+    // Clear result overlay
+    resultOverlay.style.display = 'none';
+    
+    // Remove old elements from their containers
+    if(div3.contains(image)) div3.removeChild(image);
+    if(div.contains(gifImage)) div.removeChild(gifImage);
+    if(document.body.contains(tryAgainButton)) document.body.removeChild(tryAgainButton);
+    if(div2.contains(name)) div2.removeChild(name);
+    if(div4.contains(image2)) div4.removeChild(image2);
+    if(div6.contains(image3)) div6.removeChild(image3);
 
-    playButton.style.display = 'block';
+    // Show start screen again
+    startScreen.style.display = 'flex';
     document.body.style.backgroundImage = 'url("696c1346c27df162ecd95129ff4ea552.jpg")';
-    videoPlayer02.currentTime = 0
+    
+    // Reset videos
+    videoPlayer02.currentTime = 0;
     videoPlayer02.pause();
     videoPlayer02.style.visibility = 'hidden';
-    videoPlayer03.currentTime = 0
+    videoPlayer02.style.display = 'none';
+    
+    videoPlayer03.currentTime = 0;
     videoPlayer03.pause();
-    videoPlayer03.style.visibility = 'hidden'
+    videoPlayer03.style.visibility = 'hidden';
+    videoPlayer03.style.display = 'none';
 
-        videoPlayer.addEventListener('ended', handleVideoEnd);
-    playButton.style.display = 'block';
+    videoPlayer.removeEventListener('ended', handleVideoEnd);
     videoPlayer.style.display = 'none';
     videoPlayer.pause();
   };
@@ -123,7 +193,7 @@ function handleVideoEnd(){
   
     name.textContent = `${gg}`;
     name.classList.add('wifu-name');
-    name.classList.add('animate__animated', 'animate__shakeY','animate__infinite' )
+    name.classList.add('animate__animated', 'animate__shakeY','animate__infinite' );
   
     // Load images with error handling for missing files
     loadImage(image, `imag/${gg}/${gg}.png`);
@@ -183,7 +253,7 @@ function handleVideoEnd(){
       rokari: () => { clearImages([gifImage, image3]); },
       nanahoshi: () => { clearImages([image]); },
       linia: () => { clearImages([image3, gifImage]); },
-      ghislaine: () => { clearImages([image2, image3]); },
+      ghislaine: () => { clearImages([gifImage, image3]); },
       sylphiette: () => { clearImages([image3]); },
       hilda: () => {
         clearImages([image3, gifImage]);
@@ -205,16 +275,26 @@ function handleVideoEnd(){
       specialCases[gg]();
     }
 
+    // Build result card content
+    resultCardBody.innerHTML = '';
+    resultCardBody.appendChild(gifImage);
+    resultCardBody.appendChild(name);
+    resultCardBody.appendChild(image);
+    if (image2.src) resultCardBody.appendChild(image2);
+    if (image3.src) resultCardBody.appendChild(image3);
+
     div.appendChild(gifImage);
     div2.appendChild(name);
     div3.appendChild(image);
     div4.appendChild(image2);
     div6.appendChild(image3);
 
-    tryAgainButton.textContent = 'Try Again';
+    tryAgainButton.textContent = 'Roll Again';
     tryAgainButton.classList.add('try-again-button');
     tryAgainButton.addEventListener('click',resetGame);
     
+    // Show result overlay
+    resultOverlay.style.display = 'flex';
     document.body.appendChild(tryAgainButton);
 
     document.addEventListener('keydown', function (event) {
@@ -250,4 +330,3 @@ function setupVideoBackground(videoElement) {
 }
 
 videoPlayer.addEventListener('ended', handleVideoEnd);
-
